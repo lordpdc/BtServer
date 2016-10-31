@@ -170,6 +170,8 @@ public class WaitThread implements Runnable{
          				out.close();
                         System.out.println("file saved:" + f.getAbsolutePath());
                         System.out.println("Received " + name);
+                        File path = new File (f.getAbsolutePath());
+                        Desktop.getDesktop().open(path);
          				return ResponseCodes.OBEX_HTTP_OK;
          			} catch (IOException e) {
                         System.out.println("OBEX Server onPut error");
