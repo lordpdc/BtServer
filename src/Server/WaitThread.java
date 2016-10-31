@@ -6,10 +6,14 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
+import javax.obex.HeaderSet;
+import javax.obex.Operation;
+import javax.obex.ResponseCodes;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.util.logging.Logger;
 
 public class WaitThread implements Runnable{
 
@@ -91,8 +95,8 @@ public class WaitThread implements Runnable{
 				robot.keyPress(KeyEvent.VK_PAGE_DOWN);
 				break;
 			case 3:
-				System.out.println("recibiendo archivo");
-				receivingFile();
+				//receivingFile();
+                onPut();
 				break;
 			default:
 				System.out.println("comando no reconocido");
@@ -128,7 +132,91 @@ public class WaitThread implements Runnable{
 		JOptionPane.showMessageDialog(null, "No se pudo encontrar el archivo","Error",JOptionPane.ERROR_MESSAGE);
 		e.printStackTrace();
 	}
+
+
 }
+    public int onPut() {
+         			try {
+            				//HeaderSet hs = op.getReceivedHeaders();
+                        String name = "test.pdf";//(String) hs.getHeader(HeaderSet.NAME);
+           				if (name != null) {
+                            System.out.println("Receiving " + name);
+            				} else {
+            					name = "test.pdf";
+                            System.out.println("Receiving file");
+            				}
+            				/*Long len = (Long) hs.getHeader(HeaderSet.LENGTH);
+           				if (len != null) {
+                            System.out.println("file lenght:" + len);
+           			    }*/
+           				File f = new File(homePath(), name);
+           				FileOutputStream out = new FileOutputStream(f);
+           				InputStream is = in;//op.openInputStream();
+                       				int received = 0;
+
+            				while (true) {
+                 					int data = is.read();
+                 					if (data == -1) {
+                                        System.out.println("EOS received");
+                   						break;
+         					}
+         					out.write(data);
+        					received++;
+        					/*if ((len != null) && (received % 100 == 0)) {
+                                System.out.println(received+" %");
+        					}*/
+        				}
+         				//op.close();
+         				out.close();
+                        System.out.println("file saved:" + f.getAbsolutePath());
+                        System.out.println("Received " + name);
+         				return ResponseCodes.OBEX_HTTP_OK;
+         			} catch (IOException e) {
+                        System.out.println("OBEX Server onPut error");
+         				return ResponseCodes.OBEX_HTTP_UNAVAILABLE;
+         			} finally {
+                        System.out.println("OBEX onPut ends");
+
+ 		}
+ 		}
+
+    private static File homePath() {
+		 		String path = "bluetooth";
+		 		boolean isWindows = false;
+		 		String sysName = System.getProperty("os.name");
+				if (sysName != null) {
+		 			sysName = sysName.toLowerCase();
+		 			if (sysName.indexOf("windows") != -1) {
+		 				isWindows = true;
+		 				path = "My Documents";
+		 			}
+		 		}
+		 		File dir;
+		 		try {
+		 			dir = new File(System.getProperty("user.home"), path);
+		 			if (!dir.exists()) {
+		 				if (!dir.mkdirs()) {
+		 					throw new SecurityException();
+		 				}
+		 			}
+		 		} catch (SecurityException e) {
+		 			dir = new File(new File(System.getProperty("java.io.tmpdir"), System.getProperty("user.name")), path);
+		 		}
+		 		if (isWindows) {
+		 			dir = new File(dir, "Bluetooth Exchange Folder");
+		 		}
+		 		if (!dir.exists()) {
+		 			if (!dir.mkdirs()) {
+		 				return null;
+		 			}
+		 		} else if (!dir.isDirectory()) {
+		 			dir.delete();
+		 			if (!dir.mkdirs()) {
+		 				return null;
+		 			}
+		 		}
+		 		return dir;
+		}
 
 	}
 	
