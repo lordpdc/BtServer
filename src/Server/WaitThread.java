@@ -92,7 +92,7 @@ public class WaitThread implements Runnable{
 				robot.keyPress(KeyEvent.VK_PAGE_DOWN);
 				break;
 			case 3:
-				//aki deberia abrir el archiv
+				//aki deberia abrir el archivo
 				break;
 			default:
 				System.out.println("comando no reconocido");
