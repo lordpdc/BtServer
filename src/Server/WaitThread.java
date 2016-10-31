@@ -6,11 +6,10 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class WaitThread implements Runnable{
 
@@ -92,7 +91,8 @@ public class WaitThread implements Runnable{
 				robot.keyPress(KeyEvent.VK_PAGE_DOWN);
 				break;
 			case 3:
-				//aki deberia abrir el archivo
+				System.out.println("recibiendo archivo");
+				receivingFile();
 				break;
 			default:
 				System.out.println("comando no reconocido");
@@ -101,6 +101,36 @@ public class WaitThread implements Runnable{
 
 
 		}
-	
-	
+	public void receivingFile(){
+		String file="/copy.pdf";
+		try{
+			FileOutputStream fos = new FileOutputStream(file);
+
+			byte[] buffer = new byte[8192];
+			int bytesRead = in.read(buffer, 0, buffer.length);
+			int		current = bytesRead;
+
+			do {
+				bytesRead = in.read(buffer, current,buffer.length - current);
+				if (bytesRead >= 0)
+					current += bytesRead;
+			} while (bytesRead > -1);
+			fos.write(buffer);
+			fos.flush();
+			fos.close();
+
+			File path = new File (file);
+			Desktop.getDesktop().open(path);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}catch(IllegalArgumentException e){
+		JOptionPane.showMessageDialog(null, "No se pudo encontrar el archivo","Error",JOptionPane.ERROR_MESSAGE);
+		e.printStackTrace();
+	}
 }
+
+	}
+	
+	
+
